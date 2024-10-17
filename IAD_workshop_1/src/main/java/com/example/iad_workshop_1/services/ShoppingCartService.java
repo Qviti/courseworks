@@ -1,9 +1,9 @@
 package com.example.iad_workshop_1.services;
 
+
 import com.example.iad_workshop_1.models.Product;
 import com.example.iad_workshop_1.models.ShoppingCart;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 

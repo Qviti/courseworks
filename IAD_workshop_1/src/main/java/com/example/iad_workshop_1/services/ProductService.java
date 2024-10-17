@@ -16,6 +16,10 @@ public class ProductService {
         return products;
     }
 
+    public void addProduct(Product product) {
+        products.add(product);
+    }
+
     public void saveProductImage(Long productId, MultipartFile file) {
         Product product = products.stream()
                 .filter(p -> p.getId().equals(productId))
@@ -35,6 +39,16 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         return product.getImageFile();
     }
+
+    public void deleteProductImage(Long productId) throws IOException {
+        Product product = products.stream()
+                .filter(p -> p.getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setImageFile(null);
+        product.setImagePath(null);
+    }
 }
+
 
 
