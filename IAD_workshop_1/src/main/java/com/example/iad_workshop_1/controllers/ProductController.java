@@ -1,65 +1,45 @@
 package com.example.iad_workshop_1.controllers;
 
 import com.example.iad_workshop_1.models.Product;
+import com.example.iad_workshop_1.services.ProductService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
-    private static final Map<Integer, Product> products = new HashMap<>();
+    private final ProductService productService;
 
-    static {
-        products.put(1, new Product(1, "Green Tea", 12.50, 100, "green-tea.jpg"));
-        products.put(2, new Product(2, "Black Tea", 10.00, 50, "black-tea.jpg"));
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
     @GetMapping
-    public Set<Integer> getProductList() {
-        return products.keySet();
+    public List<Product> getProducts() {
+        return productService.getAllProducts();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable int id) {
-        Product product = products.get(id);
-        if (product == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(product);
-    }
-
-    @PutMapping("/{id}/image")
-    public ResponseEntity<String> setProductImage(@PathVariable int id, @RequestBody String imageFile) {
-        Product product = products.get(id);
-        if (product == null) {
-            return ResponseEntity.notFound().build();
-        }
-        product.setImageFile(imageFile);
-        return ResponseEntity.ok("Image updated for product ID: " + id);
-    }
-
-    @DeleteMapping("/{id}/image")
-    public ResponseEntity<String> deleteProductImage(@PathVariable int id) {
-        Product product = products.get(id);
-        if (product == null) {
-            return ResponseEntity.notFound().build();
-        }
-        product.setImageFile(null);
-        return ResponseEntity.ok("Image deleted for product ID: " + id);
+    @PostMapping("/{id}/image")
+    public ResponseEntity<String> uploadProductImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        productService.saveProductImage(id, file);
+        return ResponseEntity.ok("Image uploaded successfully");
     }
 
     @GetMapping("/{id}/image")
-    public ResponseEntity<String> downloadProductImage(@PathVariable int id) {
-        Product product = products.get(id);
-        if (product == null || product.getImageFile() == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok("Downloading image for product: " + product.getImageFile());
+    public ResponseEntity<byte[]> downloadProductImage(@PathVariable Long id) {
+        byte[] image = productService.getProductImage(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        return new ResponseEntity<>(image, headers, HttpStatus.OK);
     }
 }
+
 
 
